@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aiops-operator
+  namespace: aiops-demo
+  labels:
+    app.kubernetes.io/name: aiops-operator
+    app.kubernetes.io/part-of: aiops-self-healing-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aiops-operator-role
+  labels:
+    app.kubernetes.io/name: aiops-operator
+rules:
+  # Pod observability, log capture for RCA, and graceful pod evictions
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "events"]
+    verbs: ["get", "list", "watch", "delete"]
+  # Deployment rolling restarts and memory limit patching
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch", "patch", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aiops-operator-binding
+subjects:
+  - kind: ServiceAccount
+    name: aiops-operator
+    namespace: aiops-demo
+roleRef:
+  kind: ClusterRole
+  name: aiops-operator-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aiops-operator
+  namespace: aiops-demo
+  labels:
+    app: aiops-operator
+    app.kubernetes.io/name: aiops-operator
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: aiops-operator
+  template:
+    metadata:
+      labels:
+        app: aiops-operator
+    spec:
+      serviceAccountName: aiops-operator
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: operator
+          image: python:3.12-slim
+          imagePullPolicy: IfNotPresent
+          command:
+            - "python3"
+            - "-m"
+            - "aiops_operator.controller"
+            - "--namespace=aiops-demo"
+            - "--metrics-port=8000"
+          ports:
+            - name: metrics
+              containerPort: 8000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "300m"
+              memory: "256Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: reports-volume
+              mountPath: /reports
+            - name: tmp-scratchpad
+              mountPath: /tmp
+      volumes:
+        - name: reports-volume
+          emptyDir: {}
+        - name: tmp-scratchpad
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Mi

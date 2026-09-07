@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-gateway
+  namespace: aiops-demo
+  labels:
+    app: payment-gateway
+    tier: backend
+    aiops.monitored: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-gateway
+  template:
+    metadata:
+      labels:
+        app: payment-gateway
+        tier: backend
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: payment-api
+          image: python:3.12-slim
+          imagePullPolicy: IfNotPresent
+          command:
+            - "python3"
+            - "-c"
+            - |
+              import http.server
+              import socketserver
+              import os
+              import sys
+              
+              # Chaos test trigger detection
+              if os.environ.get("CHAOS_CRASH") == "true":
+                  print("[FATAL] Chaos poison-pill injected! Raising unhandled ValueError exception.", file=sys.stderr)
+                  sys.exit(1)
+              
+              class HealthHandler(http.server.SimpleHTTPRequestHandler):
+                  def do_GET(self):
+                      if self.path in ['/healthz', '/readyz']:
+                          if os.environ.get("CHAOS_DEADLOCK") == "true":
+                              self.send_response(500)
+                              self.end_headers()
+                              self.wfile.write(b'{"status":"deadlocked"}')
+                          else:
+                              self.send_response(200)
+                              self.send_header('Content-type', 'application/json')
+                              self.end_headers()
+                              self.wfile.write(b'{"status":"healthy","tier":"payments"}')
+                      else:
+                          self.send_response(200)
+                          self.end_headers()
+                          self.wfile.write(b'{"message":"Payment Gateway Operational"}')
+                          
+              port = 8080
+              with socketserver.TCPServer(("", port), HealthHandler) as httpd:
+                  print(f"Payment Gateway listening on port {port}")
+                  httpd.serve_forever()
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp-scratchpad
+              mountPath: /tmp
+      volumes:
+        - name: tmp-scratchpad
+          emptyDir:
+            medium: Memory
+            sizeLimit: 32Mi
