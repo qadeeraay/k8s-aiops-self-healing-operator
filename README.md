@@ -1,6 +1,8 @@
 # Autonomous Kubernetes Self-Healing AIOps Operator
 
 [![Autonomous AIOps CI](https://github.com/qadeeraay/k8s-aiops-self-healing-operator/actions/workflows/aiops-ci.yml/badge.svg)](https://github.com/qadeeraay/k8s-aiops-self-healing-operator/actions/workflows/aiops-ci.yml)
+[![CodeQL Security](https://github.com/qadeeraay/k8s-aiops-self-healing-operator/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/qadeeraay/k8s-aiops-self-healing-operator/actions/workflows/codeql-analysis.yml)
+[![SRE Nightly Benchmark](https://github.com/qadeeraay/k8s-aiops-self-healing-operator/actions/workflows/sre-nightly-benchmark.yml/badge.svg)](https://github.com/qadeeraay/k8s-aiops-self-healing-operator/actions/workflows/sre-nightly-benchmark.yml)
 [![MTTR Reduction](https://img.shields.io/badge/MTTR%20Reduction-99.2%25%20(%3C5s)-brightgreen?style=flat-square&logo=speedtest)](ARCHITECTURE.md)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-v1.29+-326CE5?style=flat-square&logo=kubernetes&logoColor=white)](workload)
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)](aiops_operator)
