@@ -131,3 +131,4 @@ At current time $T_{\text{now}}$:
 | **Denial of Service** | Malicious actor repeatedly crashes pod to cause operator CPU exhaustion. | Sliding-window Circuit Breaker caps remediations to max 2 per 10 minutes per workload. |
 | **Elevation of Privilege** | Container breakout from operator pod. | Operator runs under `runAsNonRoot: true`, `readOnlyRootFilesystem: true`, and `drop: ALL` capabilities. |
 
+
