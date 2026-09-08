@@ -13,7 +13,7 @@
 
 ---
 
-## Why I Built This: Eliminating 3:00 AM Alert Fatigue
+## Incident Context: The Reality of 3:00 AM On-Call Paging
 
 Any engineer who has been on a production Kubernetes on-call rotation knows the frustration: you get paged at 3:15 AM because a pod threw an `OOMKilled` (Exit Code 137) or entered `CrashLoopBackOff`. You groggily open your laptop, run `kubectl describe pod`, check the logs, bump the memory limit by 25% or trigger a rolling restart, and go back to sleep—having lost 45 minutes of sleep over a completely deterministic, mechanical remediation.
 
