@@ -51,7 +51,7 @@ class AIOpsController:
         self.core_v1 = None
         self.apps_v1 = None
 
-        if K8S_AVAILABLE and not dry_run:
+        if K8S_AVAILABLE:
             try:
                 # Try in-cluster service account first, then fallback to ~/.kube/config
                 try:
@@ -66,7 +66,10 @@ class AIOpsController:
             except Exception as e:
                 logger.warning(f"Kubernetes cluster connection not available: {e}. Running in standalone simulation mode.")
 
-        self.remediator = Remediator(apps_v1_api=self.apps_v1, core_v1_api=self.core_v1)
+        # In dry-run mode, pass None to remediator so it operates in safe simulation mode without modifying cluster
+        remediator_apps = None if dry_run else self.apps_v1
+        remediator_core = None if dry_run else self.core_v1
+        self.remediator = Remediator(apps_v1_api=remediator_apps, core_v1_api=remediator_core)
         self.telemetry = TelemetryExporter()
         self.telemetry.start_server(port=metrics_port)
 
