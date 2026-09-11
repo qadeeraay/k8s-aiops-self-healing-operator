@@ -7,7 +7,6 @@ anti-flapping circuit breaker protection, and SRE MTTR reduction metrics.
 
 import sys
 import os
-import time
 
 # Ensure repo root is on sys.path
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
