@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 import datetime
 from enum import Enum
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger("aiops.rca_engine")
 

@@ -14,11 +14,6 @@ from typing import Any, Optional, Tuple
 
 logger = logging.getLogger("aiops.remediator")
 
-try:
-    from kubernetes import client
-    K8S_AVAILABLE = True
-except ImportError:
-    K8S_AVAILABLE = False
 
 
 class Remediator:

@@ -5,7 +5,6 @@ for Prometheus scraping and Grafana executive dashboards.
 """
 
 import logging
-from typing import Optional
 
 logger = logging.getLogger("aiops.telemetry")
 

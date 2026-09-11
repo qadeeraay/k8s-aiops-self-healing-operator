@@ -5,10 +5,8 @@ evaluates safety circuit breakers, and triggers automated remediation runbooks.
 """
 
 import argparse
-import datetime
 import logging
 import os
-import sys
 import time
 from typing import Any, Dict, Optional
 
@@ -191,9 +189,9 @@ class AIOpsController:
 
         try:
             stream = (
-                self.core_v1.list_namespaced_pod(self.namespace, watch=True)
+                w.stream(self.core_v1.list_namespaced_pod, namespace=self.namespace)
                 if self.namespace
-                else self.core_v1.list_pod_for_all_namespaces(watch=True)
+                else w.stream(self.core_v1.list_pod_for_all_namespaces)
             )
             for event in stream:
                 pod = event["object"]
@@ -219,8 +217,8 @@ class AIOpsController:
                             namespace=pod.metadata.namespace,
                             tail_lines=30,
                         )
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        logger.debug(f"Failed to fetch logs for pod {pod_name}: {e}")
                     self.handle_incident(pod_dict, recent_logs=recent_logs)
         except KeyboardInterrupt:
             logger.info("Operator stopped by user.")

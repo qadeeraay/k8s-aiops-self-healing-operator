@@ -16,7 +16,6 @@ sys.path.insert(0, REPO_ROOT)
 from aiops_operator.controller import AIOpsController
 from chaos_suite.inject_oom import get_mock_oom_pod_payload
 from chaos_suite.inject_crashloop import get_mock_crashloop_pod_payload
-from chaos_suite.inject_probe_failure import get_mock_probe_failure_payload
 
 # Terminal formatting
 CYAN = "\033[96m"
