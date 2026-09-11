@@ -69,6 +69,21 @@ class TestCircuitBreaker(unittest.TestCase):
         allowed, _ = self.cb.can_remediate(ns, workload)
         self.assertTrue(allowed)
 
+    def test_workload_isolation_between_namespaces_and_services(self):
+        """Verify tripping one workload does not impact distinct workloads or namespaces."""
+        # Trip prod/api-gateway
+        self.cb.record_remediation("prod", "api-gateway")
+        self.cb.record_remediation("prod", "api-gateway")
+        self.cb.can_remediate("prod", "api-gateway")
+
+        # Verify staging/api-gateway remains permitted
+        staging_allowed, _ = self.cb.can_remediate("staging", "api-gateway")
+        self.assertTrue(staging_allowed)
+
+        # Verify prod/payment-service remains permitted
+        payment_allowed, _ = self.cb.can_remediate("prod", "payment-service")
+        self.assertTrue(payment_allowed)
+
 
 if __name__ == "__main__":
     unittest.main()
