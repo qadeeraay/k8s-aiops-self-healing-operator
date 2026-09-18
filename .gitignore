@@ -35,3 +35,6 @@ reports/post_mortem_*.md
 *.swp
 *.swo
 .DS_Store
+
+# Go binaries
+bin/
